@@ -1,6 +1,7 @@
+// src/components/AppearanceSettings.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import {
   Check,
   Moon,
@@ -11,6 +12,8 @@ import {
 
 type Mode = "light" | "dark";
 type Theme = "sand" | "sage" | "dusk" | "rose";
+
+const APPEARANCE_EVENT = "ink-appearance-change";
 
 const themes: {
   value: Theme;
@@ -45,89 +48,78 @@ const themes: {
 ];
 
 function isTheme(value: string | null): value is Theme {
-  return themes.some((theme) => theme.value === value);
+  return themes.some((item) => item.value === value);
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(APPEARANCE_EVENT, callback);
+
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(APPEARANCE_EVENT, callback);
+  };
+}
+
+function readPreference(key: string, fallback: string) {
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function savePreference(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Keep the app usable if storage is unavailable.
+  }
+
+  window.dispatchEvent(new Event(APPEARANCE_EVENT));
+}
+
+function usePreference(key: string, fallback: string) {
+  return useSyncExternalStore(
+    subscribe,
+    () => readPreference(key, fallback),
+    () => fallback
+  );
 }
 
 export default function AppearanceSettings() {
-  const [mode, setMode] = useState<Mode>("light");
-  const [theme, setTheme] = useState<Theme>("sand");
-  const [calm, setCalm] = useState(false);
-  const [ready, setReady] = useState(false);
+  const storedMode = usePreference("ink_mode", "light");
+  const storedTheme = usePreference("ink_theme", "sand");
+  const storedCalm = usePreference("ink_calm", "false");
 
-  // Restore preferences from the existing app storage.
+  const mode: Mode =
+    storedMode === "dark" ? "dark" : "light";
+
+  const theme: Theme = isTheme(storedTheme)
+    ? storedTheme
+    : "sand";
+
+  const calm = storedCalm === "true";
+
+  // Apply preferences to the application.
   useEffect(() => {
-    try {
-      const savedMode = localStorage.getItem("ink_mode");
-      const savedTheme = localStorage.getItem("ink_theme");
-      const savedCalm = localStorage.getItem("ink_calm");
+    const root = document.documentElement;
 
-      const nextMode: Mode =
-        savedMode === "dark" ? "dark" : "light";
-
-      const nextTheme: Theme = isTheme(savedTheme)
-        ? savedTheme
-        : "sand";
-
-      const nextCalm = savedCalm === "true";
-
-      setMode(nextMode);
-      setTheme(nextTheme);
-      setCalm(nextCalm);
-
-      const root = document.documentElement;
-
-      root.dataset.mode = nextMode;
-      root.dataset.theme = nextTheme;
-      root.dataset.calm = String(nextCalm);
-    } catch {
-      // Continue with default appearance.
-    }
-
-    setReady(true);
-  }, []);
+    root.setAttribute("data-mode", mode);
+    root.setAttribute("data-theme", theme);
+    root.setAttribute("data-calm", String(calm));
+  }, [mode, theme, calm]);
 
   function updateMode(next: Mode) {
-    setMode(next);
-    document.documentElement.dataset.mode = next;
-
-    try {
-      localStorage.setItem("ink_mode", next);
-    } catch {
-      // Preference remains active for this session.
-    }
+    savePreference("ink_mode", next);
   }
 
   function updateTheme(next: Theme) {
-    setTheme(next);
-    document.documentElement.dataset.theme = next;
-
-    try {
-      localStorage.setItem("ink_theme", next);
-    } catch {
-      // Preference remains active for this session.
-    }
+    savePreference("ink_theme", next);
   }
 
   function updateCalm(next: boolean) {
-    setCalm(next);
-    document.documentElement.dataset.calm = String(next);
-
-    try {
-      localStorage.setItem("ink_calm", String(next));
-    } catch {
-      // Preference remains active for this session.
-    }
-  }
-
-  if (!ready) {
-    return (
-      <div
-        className="ink-card p-5"
-        role="status"
-      >
-        Loading appearance preferences…
-      </div>
-    );
+    savePreference("ink_calm", String(next));
   }
 
   return (
@@ -198,7 +190,9 @@ export default function AppearanceSettings() {
                   name="color-theme"
                   value={option.value}
                   checked={selected}
-                  onChange={() => updateTheme(option.value)}
+                  onChange={() =>
+                    updateTheme(option.value)
+                  }
                   className="sr-only"
                 />
 
@@ -241,7 +235,7 @@ export default function AppearanceSettings() {
         }}
       />
 
-      {/* Light / dark */}
+      {/* Light and dark mode */}
       <fieldset>
         <legend className="text-base font-semibold">
           Display appearance
@@ -253,8 +247,16 @@ export default function AppearanceSettings() {
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           {([
-            { value: "light", label: "Light", icon: Sun },
-            { value: "dark", label: "Dark", icon: Moon },
+            {
+              value: "light",
+              label: "Light",
+              icon: Sun,
+            },
+            {
+              value: "dark",
+              label: "Dark",
+              icon: Moon,
+            },
           ] as const).map((option) => {
             const Icon = option.icon;
             const selected = mode === option.value;
@@ -284,7 +286,9 @@ export default function AppearanceSettings() {
                   name="display-mode"
                   value={option.value}
                   checked={selected}
-                  onChange={() => updateMode(option.value)}
+                  onChange={() =>
+                    updateMode(option.value)
+                  }
                   className="sr-only"
                 />
 
@@ -293,6 +297,7 @@ export default function AppearanceSettings() {
                     className="ink-icon"
                     aria-hidden="true"
                   />
+
                   <span className="text-sm font-semibold">
                     {option.label}
                   </span>
@@ -373,8 +378,10 @@ export default function AppearanceSettings() {
         <div
           className="mt-4 rounded-xl p-3 text-sm"
           style={{
-            background: "rgb(var(--ink-surface-soft))",
-            border: "1px solid rgb(var(--ink-border))",
+            background:
+              "rgb(var(--ink-surface-soft))",
+            border:
+              "1px solid rgb(var(--ink-border))",
           }}
         >
           <p>
