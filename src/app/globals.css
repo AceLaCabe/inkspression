@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-/* ---------------------------------
-   Base appearance tokens
----------------------------------- */
+/* =========================================
+   01. DESIGN TOKENS
+========================================= */
 
 :root {
   color-scheme: light;
@@ -32,9 +32,7 @@
     0 18px 60px rgb(43 36 31 / 0.06);
 }
 
-/* ---------------------------------
-   Dark mode
----------------------------------- */
+/* Dark appearance */
 
 html[data-mode="dark"] {
   color-scheme: dark;
@@ -50,8 +48,6 @@ html[data-mode="dark"] {
   --ink-text: 245 239 232;
   --ink-text-soft: 215 200 190;
 
-  --ink-accent-contrast: 255 250 245;
-
   --ink-shadow-sm:
     0 4px 12px rgb(0 0 0 / 0.25);
 
@@ -59,9 +55,7 @@ html[data-mode="dark"] {
     0 18px 40px rgb(0 0 0 / 0.35);
 }
 
-/* ---------------------------------
-   Personal color themes
----------------------------------- */
+/* Personal accent themes */
 
 html[data-theme="sand"] {
   --ink-accent: 122 92 72;
@@ -79,9 +73,7 @@ html[data-theme="rose"] {
   --ink-accent: 135 72 89;
 }
 
-/* ---------------------------------
-   Tailwind mapping
----------------------------------- */
+/* Tailwind token mapping */
 
 @theme inline {
   --color-background: var(--background);
@@ -90,9 +82,9 @@ html[data-theme="rose"] {
   --font-mono: var(--font-geist-mono);
 }
 
-/* ---------------------------------
-   Base
----------------------------------- */
+/* =========================================
+   02. BASE & ACCESSIBILITY
+========================================= */
 
 html {
   min-height: 100%;
@@ -103,7 +95,12 @@ body {
   min-height: 100%;
   background: rgb(var(--ink-bg));
   color: rgb(var(--ink-text));
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+
+  font-family:
+    var(--font-geist-sans),
+    Arial,
+    sans-serif;
+
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -126,9 +123,7 @@ p {
   color: rgb(var(--ink-text));
 }
 
-/* ---------------------------------
-   Accessibility
----------------------------------- */
+/* Screen-reader-only content */
 
 .sr-only {
   position: absolute;
@@ -136,20 +131,22 @@ p {
   height: 1px;
   padding: 0;
   margin: -1px;
+
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+
   white-space: nowrap;
   border: 0;
 }
+
+/* Keyboard focus */
 
 :focus-visible {
   outline: 3px solid rgb(var(--ink-text));
   outline-offset: 3px;
 }
 
-html[data-mode="dark"] :focus-visible {
-  outline-color: rgb(var(--ink-text));
-}
+/* Interactive element defaults */
 
 button,
 a,
@@ -160,8 +157,8 @@ textarea {
 }
 
 button,
-select,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -175,6 +172,8 @@ button:disabled,
   cursor: not-allowed;
 }
 
+/* Safe-area support */
+
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -183,15 +182,58 @@ button:disabled,
   padding-top: env(safe-area-inset-top);
 }
 
-/* ---------------------------------
-   Surfaces
----------------------------------- */
+/* =========================================
+   03. TYPOGRAPHY
+========================================= */
+
+.ink-eyebrow {
+  display: block;
+
+  color: rgb(var(--ink-text-soft));
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.ink-muted,
+.ink-subtext {
+  color: rgb(var(--ink-text-soft));
+}
+
+.ink-description {
+  color: rgb(var(--ink-text-soft));
+  font-size: 0.925rem;
+  line-height: 1.65;
+}
+
+.ink-link {
+  color: rgb(var(--ink-accent));
+
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+
+  font-weight: 600;
+}
+
+html[data-mode="dark"] .ink-link {
+  color: rgb(var(--ink-text));
+}
+
+/* =========================================
+   04. SURFACES
+========================================= */
 
 .ink-card,
 .ink-panel {
+  min-width: 0;
+
   border: 1px solid rgb(var(--ink-border) / 0.72);
-  background: rgb(var(--ink-surface));
   border-radius: var(--ink-radius);
+
+  background: rgb(var(--ink-surface));
   box-shadow: var(--ink-shadow-sm);
 }
 
@@ -210,16 +252,21 @@ button:disabled,
 }
 
 .ink-card-soft {
+  min-width: 0;
+
   border: 1px solid rgb(var(--ink-border) / 0.65);
-  background: rgb(var(--ink-surface-soft));
   border-radius: var(--ink-radius);
+
+  background: rgb(var(--ink-surface-soft));
 }
 
 .ink-alert {
   border: 1px solid rgb(var(--ink-border));
+  border-radius: 1rem;
+
   background: rgb(var(--ink-surface-soft));
   color: rgb(var(--ink-text));
-  border-radius: 1rem;
+
   padding: 0.9rem 1rem;
 }
 
@@ -227,54 +274,21 @@ button:disabled,
   font-weight: 500;
 }
 
-/* ---------------------------------
-   Typography helpers
----------------------------------- */
-
-.ink-eyebrow {
-  display: block;
-  color: rgb(var(--ink-text-soft));
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  line-height: 1.5;
-  text-transform: uppercase;
-}
-
-.ink-muted,
-.ink-subtext {
-  color: rgb(var(--ink-text-soft));
-}
-
-.ink-description {
-  font-size: 0.925rem;
-  line-height: 1.65;
-  color: rgb(var(--ink-text-soft));
-}
-
-.ink-link {
-  color: rgb(var(--ink-accent));
-  text-decoration: underline;
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 4px;
-  font-weight: 600;
-}
-
-html[data-mode="dark"] .ink-link {
-  color: rgb(var(--ink-text));
-}
-
-/* ---------------------------------
-   Inputs
----------------------------------- */
+/* =========================================
+   05. FORM INPUTS
+========================================= */
 
 .ink-input {
   width: 100%;
+  min-width: 0;
   min-height: 44px;
+
   border: 1px solid rgb(var(--ink-border));
+  border-radius: 0.95rem;
+
   background: rgb(var(--ink-surface));
   color: rgb(var(--ink-text));
-  border-radius: 0.95rem;
+
   padding: 0.95rem 1rem;
   font-size: 1rem;
 
@@ -307,9 +321,9 @@ html[data-mode="dark"] .ink-link {
   resize: vertical;
 }
 
-/* ---------------------------------
-   Buttons
----------------------------------- */
+/* =========================================
+   06. BUTTONS
+========================================= */
 
 .ink-btn {
   display: inline-flex;
@@ -317,7 +331,10 @@ html[data-mode="dark"] .ink-link {
   justify-content: center;
   gap: 0.5rem;
 
+  min-width: 0;
   min-height: 44px;
+  max-width: 100%;
+
   border-radius: 999px;
   padding: 0.85rem 1.2rem;
 
@@ -326,6 +343,8 @@ html[data-mode="dark"] .ink-link {
   line-height: 1.25;
   text-align: center;
   text-decoration: none;
+
+  overflow-wrap: anywhere;
 
   transition:
     background-color 180ms ease,
@@ -350,6 +369,7 @@ html[data-mode="dark"] .ink-link {
 
 .ink-btn-primary {
   border: 1px solid rgb(var(--ink-accent));
+
   background: rgb(var(--ink-accent));
   color: rgb(var(--ink-accent-contrast));
 }
@@ -361,6 +381,7 @@ html[data-mode="dark"] .ink-link {
 .ink-btn-secondary,
 .ink-btn-danger {
   border: 1px solid rgb(var(--ink-border));
+
   background: rgb(var(--ink-surface));
   color: rgb(var(--ink-text));
 }
@@ -370,9 +391,9 @@ html[data-mode="dark"] .ink-link {
   background: rgb(var(--ink-surface-soft));
 }
 
-/* ---------------------------------
-   Chips and mood selection
----------------------------------- */
+/* =========================================
+   07. CHIPS & MOOD SELECTION
+========================================= */
 
 .ink-chip {
   display: inline-flex;
@@ -380,17 +401,24 @@ html[data-mode="dark"] .ink-link {
   justify-content: center;
   gap: 0.5rem;
 
+  min-width: 0;
   min-height: 44px;
+  max-width: 100%;
+
+  border: 1.5px solid rgb(var(--ink-border));
   border-radius: 999px;
+
   padding: 0.65rem 1rem;
+
+  background: rgb(var(--ink-surface));
+  color: rgb(var(--ink-text));
 
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.25;
+  text-align: center;
 
-  border: 1.5px solid rgb(var(--ink-border));
-  background: rgb(var(--ink-surface));
-  color: rgb(var(--ink-text));
+  overflow-wrap: anywhere;
 
   transition:
     transform 160ms ease,
@@ -432,9 +460,9 @@ html[data-mode="dark"] .ink-link {
   color: rgb(var(--ink-text));
 }
 
-/* ---------------------------------
-   Icon styling
----------------------------------- */
+/* =========================================
+   08. ICONS
+========================================= */
 
 .ink-icon {
   width: 1.125rem;
@@ -446,43 +474,55 @@ html[data-mode="dark"] .ink-link {
 .ink-icon-sm {
   width: 1rem;
   height: 1rem;
+  flex-shrink: 0;
 }
 
 .ink-icon-lg {
   width: 1.5rem;
   height: 1.5rem;
+  flex-shrink: 0;
 }
 
 .ink-icon-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+
   width: 44px;
   height: 44px;
-  border-radius: 0.9rem;
-  color: rgb(var(--ink-accent));
-  background: rgb(var(--ink-accent) / 0.10);
+
   border: 1px solid rgb(var(--ink-accent) / 0.25);
+  border-radius: 0.9rem;
+
+  background: rgb(var(--ink-accent) / 0.1);
+  color: rgb(var(--ink-accent));
 }
 
-/* ---------------------------------
-   Navigation
----------------------------------- */
+/* =========================================
+   09. DESKTOP NAVIGATION
+========================================= */
 
 .ink-nav-link {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+
   min-height: 44px;
   padding: 0.75rem 0.9rem;
 
   border-radius: 0.85rem;
+  border: 1px solid transparent;
+
   color: rgb(var(--ink-text));
+
   font-size: 0.95rem;
   font-weight: 500;
   text-decoration: none;
 
-  transition: background-color 160ms ease;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 
 .ink-nav-link:hover {
@@ -490,14 +530,109 @@ html[data-mode="dark"] .ink-link {
 }
 
 .ink-nav-link[aria-current="page"] {
+  border-color: rgb(var(--ink-accent) / 0.35);
   background: rgb(var(--ink-accent) / 0.12);
-  border: 1px solid rgb(var(--ink-accent) / 0.35);
   font-weight: 700;
 }
 
-/* ---------------------------------
-   Settings controls
----------------------------------- */
+/* =========================================
+   10. STANDARD MOBILE NAVIGATION
+========================================= */
+
+.ink-mobile-nav {
+  display: none;
+}
+
+.ink-mobile-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+
+  min-width: 0;
+  min-height: 56px;
+
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+
+  padding: 0.5rem 0.25rem;
+
+  color: rgb(var(--ink-text-soft));
+  text-align: center;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ink-mobile-nav-link span {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+
+  font-size: 0.75rem;
+  line-height: 1.3;
+
+  overflow-wrap: anywhere;
+}
+
+.ink-mobile-nav-link[aria-current="page"] {
+  border-color: rgb(var(--ink-border));
+  background: rgb(var(--ink-surface-soft));
+  color: rgb(var(--ink-text));
+  font-weight: 700;
+}
+
+.ink-mobile-nav-link:focus-visible {
+  outline-offset: -3px;
+}
+
+/* =========================================
+   11. COMPACT / HIGH-ZOOM NAVIGATION
+========================================= */
+
+.ink-narrow-nav {
+  display: none;
+}
+
+.ink-narrow-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+
+  min-width: 0;
+  min-height: 44px;
+
+  padding: 0.6rem 0.75rem;
+
+  border: 1px solid rgb(var(--ink-border));
+  border-radius: 0.75rem;
+
+  background: rgb(var(--ink-surface));
+  color: rgb(var(--ink-text));
+
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+
+  text-align: center;
+  text-decoration: none;
+
+  overflow-wrap: anywhere;
+}
+
+.ink-narrow-nav-link:hover {
+  background: rgb(var(--ink-surface-soft));
+}
+
+.ink-narrow-nav-link[aria-current="page"] {
+  border-color: rgb(var(--ink-accent));
+  background: rgb(var(--ink-accent) / 0.1);
+}
+
+/* =========================================
+   12. SETTINGS CONTROLS
+========================================= */
 
 .ink-setting-option {
   display: flex;
@@ -507,18 +642,21 @@ html[data-mode="dark"] .ink-link {
 
   width: 100%;
   min-height: 52px;
+
   padding: 0.9rem 1rem;
 
   border: 1.5px solid rgb(var(--ink-border));
   border-radius: 1rem;
+
   background: rgb(var(--ink-surface));
   color: rgb(var(--ink-text));
+
   text-align: left;
 }
 
 .ink-setting-option[aria-pressed="true"] {
   border-color: rgb(var(--ink-accent));
-  background: rgb(var(--ink-accent) / 0.10);
+  background: rgb(var(--ink-accent) / 0.1);
 }
 
 .ink-switch {
@@ -530,10 +668,12 @@ html[data-mode="dark"] .ink-link {
   width: 72px;
   min-width: 72px;
   min-height: 36px;
+
   padding: 0 7px;
 
   border: 1px solid rgb(var(--ink-border));
   border-radius: 999px;
+
   background: rgb(var(--ink-surface-soft));
   color: rgb(var(--ink-text));
 
@@ -543,13 +683,16 @@ html[data-mode="dark"] .ink-link {
 
 .ink-switch::after {
   content: "";
+
   position: absolute;
   left: 5px;
   top: 50%;
-  transform: translateY(-50%);
 
   width: 24px;
   height: 24px;
+
+  transform: translateY(-50%);
+
   border-radius: 50%;
   background: rgb(var(--ink-text-soft));
 
@@ -572,6 +715,7 @@ html[data-mode="dark"] .ink-link {
 .ink-theme-swatch {
   width: 18px;
   height: 18px;
+
   border-radius: 50%;
   border: 1px solid rgb(var(--ink-text) / 0.25);
 }
@@ -592,17 +736,21 @@ html[data-mode="dark"] .ink-link {
   background: #874859;
 }
 
-/* ---------------------------------
-   Recent entry states
----------------------------------- */
+/* =========================================
+   13. REFLECTION CARDS & EMPTY STATES
+========================================= */
 
 .ink-entry-card {
   display: block;
+
   padding: 1rem;
+
   border: 1px solid rgb(var(--ink-border) / 0.7);
   border-radius: 1rem;
+
   background: rgb(var(--ink-surface));
   color: rgb(var(--ink-text));
+
   text-decoration: none;
 }
 
@@ -612,22 +760,26 @@ html[data-mode="dark"] .ink-link {
 
 .ink-empty-state {
   padding: 1.5rem;
+
   border: 1px dashed rgb(var(--ink-border));
   border-radius: 1rem;
+
   background: rgb(var(--ink-surface-soft));
 }
 
 .ink-returning-note {
-  border-left: 3px solid rgb(var(--ink-accent));
   padding: 0.75rem 1rem;
-  color: rgb(var(--ink-text));
-  background: rgb(var(--ink-accent) / 0.08);
+
+  border-left: 3px solid rgb(var(--ink-accent));
   border-radius: 0 0.8rem 0.8rem 0;
+
+  background: rgb(var(--ink-accent) / 0.08);
+  color: rgb(var(--ink-text));
 }
 
-/* ---------------------------------
-   Card links
----------------------------------- */
+/* =========================================
+   14. CARD LINKS
+========================================= */
 
 .ink-card-link {
   display: block;
@@ -635,6 +787,7 @@ html[data-mode="dark"] .ink-link {
 
   transition:
     background-color 180ms ease,
+    border-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
 }
@@ -644,9 +797,91 @@ html[data-mode="dark"] .ink-link {
   box-shadow: var(--ink-shadow-md);
 }
 
-/* ---------------------------------
-   Ultra calm mode
----------------------------------- */
+/* =========================================
+   15. RESPONSIVE LAYOUT
+========================================= */
+
+/* Standard mobile navigation */
+
+@media (min-width: 361px) and (max-width: 767px) {
+  .ink-mobile-nav {
+    display: block;
+
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 50;
+
+    border-top: 1px solid rgb(var(--ink-border));
+
+    background: rgb(var(--ink-surface));
+
+    box-shadow:
+      0 -8px 24px rgb(0 0 0 / 0.06);
+  }
+}
+
+/* High zoom and very narrow viewports */
+
+@media (max-width: 360px) {
+  .ink-narrow-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .ink-narrow-nav-link {
+    flex: 1 1 auto;
+  }
+
+  .ink-mobile-nav {
+    display: none;
+  }
+
+  #main-content {
+    width: 100%;
+    min-width: 0;
+    padding: 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
+  .ink-card,
+  .ink-panel,
+  .ink-card-soft {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ink-panel {
+    padding: 1rem;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .ink-btn,
+  .ink-chip {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .ink-chip {
+    text-align: center;
+  }
+}
+
+/* =========================================
+   16. ULTRA CALM
+========================================= */
 
 html[data-calm="true"] .ink-card,
 html[data-calm="true"] .ink-panel {
@@ -666,11 +901,12 @@ html[data-calm="true"] *::before,
 html[data-calm="true"] *::after {
   animation-duration: 0.01ms !important;
   transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
-/* ---------------------------------
-   Reduced motion
----------------------------------- */
+/* =========================================
+   17. REDUCED MOTION
+========================================= */
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -687,12 +923,9 @@ html[data-calm="true"] *::after {
 
   .ink-btn:hover,
   .ink-chip:hover,
-  .ink-card-link:hover {
-    transform: none;
-  }
-
-  .ink-chip:active,
-  .ink-btn:active {
+  .ink-card-link:hover,
+  .ink-btn:active,
+  .ink-chip:active {
     transform: none;
   }
 }
