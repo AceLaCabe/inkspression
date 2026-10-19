@@ -7,6 +7,7 @@
 :root {
   color-scheme: light;
 
+  /* Base colors */
   --background: #f6f1ea;
   --foreground: #2f2722;
 
@@ -18,11 +19,18 @@
   --ink-text: 47 39 34;
   --ink-text-soft: 98 84 75;
 
+  /* Accent */
   --ink-accent: 122 92 72;
   --ink-accent-contrast: 255 250 245;
 
+  /* Text selection */
+  --ink-selection-bg: #7a5c48;
+  --ink-selection-text: #ffffff;
+
+  /* Shape */
   --ink-radius: 1.25rem;
 
+  /* Shadows */
   --ink-shadow-sm:
     0 2px 6px rgb(43 36 31 / 0.05),
     0 8px 20px rgb(43 36 31 / 0.04);
@@ -32,7 +40,9 @@
     0 18px 60px rgb(43 36 31 / 0.06);
 }
 
-/* Dark appearance */
+/* =========================================
+   02. APPEARANCE MODES
+========================================= */
 
 html[data-mode="dark"] {
   color-scheme: dark;
@@ -48,6 +58,10 @@ html[data-mode="dark"] {
   --ink-text: 245 239 232;
   --ink-text-soft: 215 200 190;
 
+  /* High-contrast dark selection */
+  --ink-selection-bg: #f0d2af;
+  --ink-selection-text: #211b19;
+
   --ink-shadow-sm:
     0 4px 12px rgb(0 0 0 / 0.25);
 
@@ -55,7 +69,7 @@ html[data-mode="dark"] {
     0 18px 40px rgb(0 0 0 / 0.35);
 }
 
-/* Personal accent themes */
+/* Personal color themes */
 
 html[data-theme="sand"] {
   --ink-accent: 122 92 72;
@@ -73,17 +87,20 @@ html[data-theme="rose"] {
   --ink-accent: 135 72 89;
 }
 
-/* Tailwind token mapping */
+/* =========================================
+   03. TAILWIND MAPPING
+========================================= */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 /* =========================================
-   02. BASE & ACCESSIBILITY
+   04. BASE
 ========================================= */
 
 html {
@@ -93,6 +110,7 @@ html {
 
 body {
   min-height: 100%;
+
   background: rgb(var(--ink-bg));
   color: rgb(var(--ink-text));
 
@@ -118,17 +136,36 @@ p {
   line-height: 1.65;
 }
 
+/* =========================================
+   05. ACCESSIBILITY
+========================================= */
+
+/* High-contrast text selection */
+
 ::selection {
-  background: rgb(var(--ink-accent) / 0.2);
-  color: rgb(var(--ink-text));
+  background-color: var(--ink-selection-bg);
+  color: var(--ink-selection-text);
 }
 
-/* Screen-reader-only content */
+::-moz-selection {
+  background-color: var(--ink-selection-bg);
+  color: var(--ink-selection-text);
+}
+
+input::selection,
+textarea::selection {
+  background-color: var(--ink-selection-bg);
+  color: var(--ink-selection-text);
+}
+
+/* Screen reader utility */
 
 .sr-only {
   position: absolute;
+
   width: 1px;
   height: 1px;
+
   padding: 0;
   margin: -1px;
 
@@ -146,7 +183,7 @@ p {
   outline-offset: 3px;
 }
 
-/* Interactive element defaults */
+/* Interactive target sizes */
 
 button,
 a,
@@ -172,7 +209,7 @@ button:disabled,
   cursor: not-allowed;
 }
 
-/* Safe-area support */
+/* Safe areas */
 
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
@@ -183,17 +220,19 @@ button:disabled,
 }
 
 /* =========================================
-   03. TYPOGRAPHY
+   06. TYPOGRAPHY
 ========================================= */
 
 .ink-eyebrow {
   display: block;
 
   color: rgb(var(--ink-text-soft));
+
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.07em;
   line-height: 1.5;
+
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
@@ -204,6 +243,7 @@ button:disabled,
 
 .ink-description {
   color: rgb(var(--ink-text-soft));
+
   font-size: 0.925rem;
   line-height: 1.65;
 }
@@ -211,11 +251,11 @@ button:disabled,
 .ink-link {
   color: rgb(var(--ink-accent));
 
+  font-weight: 600;
+
   text-decoration: underline;
   text-decoration-thickness: 1.5px;
   text-underline-offset: 4px;
-
-  font-weight: 600;
 }
 
 html[data-mode="dark"] .ink-link {
@@ -223,7 +263,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   04. SURFACES
+   07. SURFACES
 ========================================= */
 
 .ink-card,
@@ -261,13 +301,13 @@ html[data-mode="dark"] .ink-link {
 }
 
 .ink-alert {
+  padding: 0.9rem 1rem;
+
   border: 1px solid rgb(var(--ink-border));
   border-radius: 1rem;
 
   background: rgb(var(--ink-surface-soft));
   color: rgb(var(--ink-text));
-
-  padding: 0.9rem 1rem;
 }
 
 .ink-alert[role="alert"] {
@@ -275,7 +315,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   05. FORM INPUTS
+   08. FORM INPUTS
 ========================================= */
 
 .ink-input {
@@ -283,13 +323,14 @@ html[data-mode="dark"] .ink-link {
   min-width: 0;
   min-height: 44px;
 
+  padding: 0.95rem 1rem;
+
   border: 1px solid rgb(var(--ink-border));
   border-radius: 0.95rem;
 
   background: rgb(var(--ink-surface));
   color: rgb(var(--ink-text));
 
-  padding: 0.95rem 1rem;
   font-size: 1rem;
 
   transition:
@@ -322,7 +363,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   06. BUTTONS
+   09. BUTTONS
 ========================================= */
 
 .ink-btn {
@@ -335,15 +376,16 @@ html[data-mode="dark"] .ink-link {
   min-height: 44px;
   max-width: 100%;
 
-  border-radius: 999px;
   padding: 0.85rem 1.2rem;
+
+  border-radius: 999px;
 
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.25;
+
   text-align: center;
   text-decoration: none;
-
   overflow-wrap: anywhere;
 
   transition:
@@ -367,6 +409,8 @@ html[data-mode="dark"] .ink-link {
   transform: none;
 }
 
+/* Primary */
+
 .ink-btn-primary {
   border: 1px solid rgb(var(--ink-accent));
 
@@ -377,6 +421,8 @@ html[data-mode="dark"] .ink-link {
 .ink-btn-primary:hover {
   box-shadow: var(--ink-shadow-md);
 }
+
+/* Secondary and danger */
 
 .ink-btn-secondary,
 .ink-btn-danger {
@@ -392,7 +438,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   07. CHIPS & MOOD SELECTION
+   10. CHIPS & MOOD SELECTION
 ========================================= */
 
 .ink-chip {
@@ -405,10 +451,10 @@ html[data-mode="dark"] .ink-link {
   min-height: 44px;
   max-width: 100%;
 
+  padding: 0.65rem 1rem;
+
   border: 1.5px solid rgb(var(--ink-border));
   border-radius: 999px;
-
-  padding: 0.65rem 1rem;
 
   background: rgb(var(--ink-surface));
   color: rgb(var(--ink-text));
@@ -436,12 +482,17 @@ html[data-mode="dark"] .ink-link {
   transform: scale(0.98);
 }
 
+/* Selected state */
+
 .ink-chip[aria-pressed="true"],
 .ink-chip-active {
   background: rgb(var(--ink-accent));
   color: rgb(var(--ink-accent-contrast));
+
   border-color: rgb(var(--ink-accent));
 }
+
+/* Variants */
 
 .ink-chip-action {
   border-style: dashed;
@@ -450,23 +501,26 @@ html[data-mode="dark"] .ink-link {
 
 .ink-chip-danger {
   border: 1px solid rgb(var(--ink-border));
+
   background: rgb(var(--ink-surface));
   color: rgb(var(--ink-text));
 }
 
 .ink-chip-accent {
   border: 1px solid rgb(var(--ink-accent) / 0.45);
+
   background: rgb(var(--ink-accent) / 0.12);
   color: rgb(var(--ink-text));
 }
 
 /* =========================================
-   08. ICONS
+   11. ICONS
 ========================================= */
 
 .ink-icon {
   width: 1.125rem;
   height: 1.125rem;
+
   flex-shrink: 0;
   stroke-width: 1.8;
 }
@@ -500,7 +554,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   09. DESKTOP NAVIGATION
+   12. DESKTOP NAVIGATION
 ========================================= */
 
 .ink-nav-link {
@@ -511,8 +565,8 @@ html[data-mode="dark"] .ink-link {
   min-height: 44px;
   padding: 0.75rem 0.9rem;
 
-  border-radius: 0.85rem;
   border: 1px solid transparent;
+  border-radius: 0.85rem;
 
   color: rgb(var(--ink-text));
 
@@ -532,11 +586,12 @@ html[data-mode="dark"] .ink-link {
 .ink-nav-link[aria-current="page"] {
   border-color: rgb(var(--ink-accent) / 0.35);
   background: rgb(var(--ink-accent) / 0.12);
+
   font-weight: 700;
 }
 
 /* =========================================
-   10. STANDARD MOBILE NAVIGATION
+   13. STANDARD MOBILE NAVIGATION
 ========================================= */
 
 .ink-mobile-nav {
@@ -553,19 +608,21 @@ html[data-mode="dark"] .ink-link {
   min-width: 0;
   min-height: 56px;
 
+  padding: 0.5rem 0.25rem;
+
   border: 1px solid transparent;
   border-radius: 0.75rem;
 
-  padding: 0.5rem 0.25rem;
-
   color: rgb(var(--ink-text-soft));
+
+  font-weight: 500;
   text-align: center;
   text-decoration: none;
-  font-weight: 500;
 }
 
 .ink-mobile-nav-link span {
   display: block;
+
   min-width: 0;
   max-width: 100%;
 
@@ -577,8 +634,10 @@ html[data-mode="dark"] .ink-link {
 
 .ink-mobile-nav-link[aria-current="page"] {
   border-color: rgb(var(--ink-border));
+
   background: rgb(var(--ink-surface-soft));
   color: rgb(var(--ink-text));
+
   font-weight: 700;
 }
 
@@ -587,7 +646,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   11. COMPACT / HIGH-ZOOM NAVIGATION
+   14. COMPACT / HIGH-ZOOM NAVIGATION
 ========================================= */
 
 .ink-narrow-nav {
@@ -617,7 +676,6 @@ html[data-mode="dark"] .ink-link {
 
   text-align: center;
   text-decoration: none;
-
   overflow-wrap: anywhere;
 }
 
@@ -631,7 +689,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   12. SETTINGS CONTROLS
+   15. SETTINGS CONTROLS
 ========================================= */
 
 .ink-setting-option {
@@ -659,8 +717,11 @@ html[data-mode="dark"] .ink-link {
   background: rgb(var(--ink-accent) / 0.1);
 }
 
+/* Switch */
+
 .ink-switch {
   position: relative;
+
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -702,15 +763,18 @@ html[data-mode="dark"] .ink-link {
 }
 
 .ink-switch[aria-checked="true"] {
+  border-color: rgb(var(--ink-accent));
+
   background: rgb(var(--ink-accent));
   color: rgb(var(--ink-accent-contrast));
-  border-color: rgb(var(--ink-accent));
 }
 
 .ink-switch[aria-checked="true"]::after {
   left: 41px;
   background: rgb(var(--ink-accent-contrast));
 }
+
+/* Theme swatches */
 
 .ink-theme-swatch {
   width: 18px;
@@ -737,7 +801,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   13. REFLECTION CARDS & EMPTY STATES
+   16. REFLECTION CARDS & EMPTY STATES
 ========================================= */
 
 .ink-entry-card {
@@ -778,7 +842,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   14. CARD LINKS
+   17. CARD LINKS
 ========================================= */
 
 .ink-card-link {
@@ -798,7 +862,7 @@ html[data-mode="dark"] .ink-link {
 }
 
 /* =========================================
-   15. RESPONSIVE LAYOUT
+   18. RESPONSIVE LAYOUT
 ========================================= */
 
 /* Standard mobile navigation */
@@ -810,6 +874,7 @@ html[data-mode="dark"] .ink-link {
     position: fixed;
     inset-inline: 0;
     bottom: 0;
+
     z-index: 50;
 
     border-top: 1px solid rgb(var(--ink-border));
@@ -821,7 +886,7 @@ html[data-mode="dark"] .ink-link {
   }
 }
 
-/* High zoom and very narrow viewports */
+/* High zoom / narrow viewport */
 
 @media (max-width: 360px) {
   .ink-narrow-nav {
@@ -844,7 +909,9 @@ html[data-mode="dark"] .ink-link {
   #main-content {
     width: 100%;
     min-width: 0;
+
     padding: 0.75rem;
+
     overflow-wrap: anywhere;
   }
 
@@ -873,14 +940,10 @@ html[data-mode="dark"] .ink-link {
     white-space: normal;
     overflow-wrap: anywhere;
   }
-
-  .ink-chip {
-    text-align: center;
-  }
 }
 
 /* =========================================
-   16. ULTRA CALM
+   19. ULTRA CALM
 ========================================= */
 
 html[data-calm="true"] .ink-card,
@@ -905,7 +968,7 @@ html[data-calm="true"] *::after {
 }
 
 /* =========================================
-   17. REDUCED MOTION
+   20. REDUCED MOTION
 ========================================= */
 
 @media (prefers-reduced-motion: reduce) {
