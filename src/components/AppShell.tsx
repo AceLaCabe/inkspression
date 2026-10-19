@@ -1,10 +1,21 @@
-// src/components/AppShell.tsx
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
+
+import {
+  BookOpenText,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Moon,
+  Settings,
+} from "lucide-react";
+
+import type { LucideIcon } from "lucide-react";
+
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -13,300 +24,363 @@ type Props = {
   children: React.ReactNode;
 };
 
-type Mode = "light" | "dark";
 type ThemeName = "sand" | "sage" | "dusk" | "rose";
 
-const navItems = [
-  { href: "/app", label: "Dashboard" },
-  { href: "/app/entries", label: "Entries" },
-  { href: "/app/settings", label: "Settings" },
-] as const;
+const navItems: {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    href: "/app",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    href: "/app/entries",
+    label: "Entries",
+    icon: BookOpenText,
+  },
+  {
+    href: "/app/settings",
+    label: "Settings",
+    icon: Settings,
+  },
+];
 
-const isThemeName = (value: string | null): value is ThemeName =>
-  value === "sand" || value === "sage" || value === "dusk" || value === "rose";
+function isThemeName(
+  value: string | null
+): value is ThemeName {
+  return (
+    value === "sand" ||
+    value === "sage" ||
+    value === "dusk" ||
+    value === "rose"
+  );
+}
 
-export default function AppShell({ title, children }: Props) {
+export default function AppShell({
+  title,
+  children,
+}: Props) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
-  const pageHeadingId = useId();
 
-  const [mode, setMode] = useState<Mode>("light");
-  const [theme, setTheme] = useState<ThemeName>("sand");
   const [ready, setReady] = useState(false);
-  const [showMobileAppearance, setShowMobileAppearance] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
+  /*
+   * Restore existing appearance settings.
+   *
+   * Retains the original localStorage keys:
+   * ink_mode and ink_theme.
+   *
+   * Ultra calm will be managed separately
+   * through ink_calm.
+   */
   useEffect(() => {
-    const savedMode = window.localStorage.getItem("ink_mode");
-    const savedTheme = window.localStorage.getItem("ink_theme");
+    const savedMode = localStorage.getItem("ink_mode");
+    const savedTheme = localStorage.getItem("ink_theme");
+    const savedCalm = localStorage.getItem("ink_calm");
 
-    const initialMode: Mode = savedMode === "dark" ? "dark" : "light";
-    const initialTheme: ThemeName = isThemeName(savedTheme) ? savedTheme : "sand";
+    const initialMode =
+      savedMode === "dark" ? "dark" : "light";
 
-    setMode(initialMode);
-    setTheme(initialTheme);
+    const initialTheme = isThemeName(savedTheme)
+      ? savedTheme
+      : "sand";
 
-    document.documentElement.setAttribute("data-mode", initialMode);
-    document.documentElement.setAttribute("data-theme", initialTheme);
+    document.documentElement.dataset.mode =
+      initialMode;
+
+    document.documentElement.dataset.theme =
+      initialTheme;
+
+    document.documentElement.dataset.calm =
+      savedCalm === "true" ? "true" : "false";
 
     setReady(true);
   }, []);
 
-  useEffect(() => {
-    if (!ready) return;
-    window.localStorage.setItem("ink_mode", mode);
-    document.documentElement.setAttribute("data-mode", mode);
-  }, [mode, ready]);
-
-  useEffect(() => {
-    if (!ready) return;
-    window.localStorage.setItem("ink_theme", theme);
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme, ready]);
-
   async function handleSignOut() {
+    if (signingOut) return;
+
+    setSigningOut(true);
+
     try {
       const uid = user?.uid;
 
       sessionStorage.removeItem("ink_mood");
 
       if (uid) {
-        localStorage.removeItem(`ink_custom_moods_${uid}`);
+        localStorage.removeItem(
+          `ink_custom_moods_${uid}`
+        );
       }
 
       await signOut(auth);
+
       window.location.href = "/";
     } catch (error) {
       console.error("Sign out failed:", error);
+      setSigningOut(false);
     }
   }
 
-  const ultraCalm = mode === "dark";
+  function isActive(href: string) {
+    if (href === "/app") {
+      return pathname === "/app";
+    }
+
+    return (
+      pathname === href ||
+      pathname.startsWith(`${href}/`)
+    );
+  }
 
   if (!ready) return null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+
+      {/* Skip navigation */}
       <a
         href="#main-content"
-        className="absolute left-4 top-4 z-[100] -translate-y-20 rounded-xl px-4 py-2 text-sm font-medium shadow-md transition focus:translate-y-0 focus-visible:translate-y-0"
-        style={{
-          background: "rgb(var(--ink-surface))",
-          color: "rgb(var(--ink-text))",
-          border: "1px solid rgb(var(--ink-border))",
-        }}
+        className="
+          sr-only
+          focus:not-sr-only
+          focus:fixed
+          focus:left-4
+          focus:top-4
+          focus:z-[100]
+          focus:rounded-xl
+          focus:bg-background
+          focus:px-5
+          focus:py-3
+          focus:font-semibold
+          focus:text-foreground
+        "
       >
         Skip to main content
       </a>
 
       <div className="mx-auto max-w-6xl p-4 md:p-8">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_1fr]">
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-[240px_minmax(0,1fr)]">
+
+          {/* Desktop sidebar */}
           <aside
-            className="hidden rounded-2xl p-5 shadow-sm md:block"
+            className="
+              hidden
+              self-start
+              rounded-2xl
+              p-5
+              md:sticky
+              md:top-8
+              md:block
+            "
             style={{
               background: "rgb(var(--ink-surface))",
-              border: "1px solid rgb(var(--ink-border))",
+              border:
+                "1px solid rgb(var(--ink-border))",
+              boxShadow: "var(--ink-shadow-sm)",
             }}
-            aria-label="Sidebar"
+            aria-label="Application sidebar"
           >
-            <div className="mb-6">
-              <Link href={user ? "/app" : "/"} className="flex items-start gap-3">
-                <span
-                  className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-2xl"
-                  style={{
-                    border: "1px solid rgb(var(--ink-border))",
-                    background: "rgb(var(--ink-surface-soft))",
-                  }}
-                  aria-hidden="true"
-                >
-                  🌙
+            {/* Branding */}
+            <Link
+              href={user ? "/app" : "/"}
+              className="flex items-start gap-3 rounded-xl"
+              aria-label="Inkspression home"
+            >
+              <span
+                className="ink-icon-badge shrink-0"
+                aria-hidden="true"
+              >
+                <Moon className="ink-icon-lg" />
+              </span>
+
+              <span className="min-w-0">
+                <span className="block text-lg font-semibold tracking-tight">
+                  Inkspression
                 </span>
 
-                <div>
-                  <div className="text-2xl font-semibold tracking-tight">
-                    Inkspression
-                  </div>
-                  <div className="mt-1 text-sm ink-muted">
-                    Gentle journaling for busy brains
-                  </div>
-                </div>
-              </Link>
-            </div>
+                <span className="ink-subtext mt-1 block text-sm leading-relaxed">
+                  Gentle journaling for busy minds
+                </span>
+              </span>
+            </Link>
 
-            <nav className="space-y-1" aria-label="Primary">
+            {/* Navigation */}
+            <nav
+              className="mt-9 space-y-2"
+              aria-label="Primary navigation"
+            >
               {navItems.map((item) => (
                 <SideNavLink
                   key={item.href}
                   href={item.href}
-                  active={pathname === item.href}
-                >
-                  {item.label}
-                </SideNavLink>
+                  label={item.label}
+                  icon={item.icon}
+                  active={isActive(item.href)}
+                />
               ))}
             </nav>
 
-            <AppearanceControls
-              className="mt-8"
-              ultraCalm={ultraCalm}
-              theme={theme}
-              onToggleMode={() => setMode((m) => (m === "light" ? "dark" : "light"))}
-              onThemeChange={setTheme}
-            />
+            {/* Low pressure reassurance */}
+            <div
+              className="mt-12 rounded-2xl p-4"
+              style={{
+                background:
+                  "rgb(var(--ink-surface-soft))",
+                border:
+                  "1px solid rgb(var(--ink-border))",
+              }}
+            >
+              <p className="text-sm font-semibold">
+                No pressure here.
+              </p>
+
+              <p className="ink-subtext mt-2 text-sm">
+                No streaks to keep.
+                Come back whenever.
+              </p>
+            </div>
           </aside>
 
+          {/* Main content */}
           <main
             id="main-content"
-            className="rounded-2xl p-4 shadow-sm md:p-6"
+            className="min-w-0 rounded-2xl p-4 shadow-sm sm:p-6"
             style={{
               background: "rgb(var(--ink-surface))",
-              border: "1px solid rgb(var(--ink-border))",
+              border:
+                "1px solid rgb(var(--ink-border))",
             }}
-            aria-labelledby={pageHeadingId}
           >
-            <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <h1 id={pageHeadingId} className="text-xl font-semibold">
-                {title}
-              </h1>
+            {/* Header */}
+            <header className="mb-7 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="ink-eyebrow">
+                  Inkspression
+                </p>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowMobileAppearance((v) => !v)}
-                  aria-expanded={showMobileAppearance}
-                  aria-controls="mobile-appearance-panel"
-                  className="md:hidden inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition"
-                  style={{
-                    background: showMobileAppearance
-                      ? "rgb(var(--ink-surface-soft))"
-                      : "rgb(var(--ink-surface))",
-                    border: "1px solid rgb(var(--ink-border))",
-                    color: "rgb(var(--ink-text))",
-                    boxShadow: "var(--ink-shadow-sm)",
-                  }}
-                >
-                  <span
-                    className="flex h-5 w-5 items-center justify-center rounded-full"
-                    style={{
-                      background: "rgba(var(--ink-accent), 0.12)",
-                      border: "1px solid rgba(var(--ink-accent), 0.18)",
-                      color: "rgb(var(--ink-text))",
-                      fontSize: "0.7rem",
-                    }}
-                    aria-hidden="true"
-                  >
-                    ✦
-                  </span>
+                <p className="mt-1 text-lg font-semibold">
+                  {title}
+                </p>
+              </div>
 
-                  Appearance
-
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      transform: showMobileAppearance ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 180ms ease",
-                      color: "rgb(var(--ink-text-soft))",
-                    }}
-                  >
-                    ▾
-                  </span>
-                </button>
-
+              <div className="flex items-center gap-3">
                 {loading ? (
-                  <span className="text-xs ink-muted">Checking…</span>
+                  <span
+                    className="ink-subtext text-sm"
+                    role="status"
+                  >
+                    Checking account…
+                  </span>
                 ) : user ? (
                   <button
                     type="button"
                     onClick={handleSignOut}
+                    disabled={signingOut}
                     className="ink-btn ink-btn-secondary"
                   >
-                    Sign out
+                    <LogOut
+                      className="ink-icon-sm"
+                      aria-hidden="true"
+                    />
+
+                    {signingOut
+                      ? "Signing out…"
+                      : "Sign out"}
                   </button>
                 ) : (
-                  <Link href="/auth" className="ink-btn ink-btn-secondary">
+                  <Link
+                    href="/auth"
+                    className="ink-btn ink-btn-secondary"
+                  >
+                    <LogIn
+                      className="ink-icon-sm"
+                      aria-hidden="true"
+                    />
                     Sign in
                   </Link>
                 )}
               </div>
             </header>
 
-            <div
-              id="mobile-appearance-panel"
-              className="overflow-hidden md:hidden"
-              style={{
-                maxHeight: showMobileAppearance ? "420px" : "0px",
-                opacity: showMobileAppearance ? 1 : 0,
-                marginBottom: showMobileAppearance ? "1.25rem" : "0rem",
-                transition:
-                  "max-height 260ms ease, opacity 180ms ease, margin-bottom 180ms ease",
-              }}
-            >
-              <div
-                className="rounded-2xl p-1"
-                style={{
-                  background: "rgba(var(--ink-accent), 0.05)",
-                  border: "1px solid rgb(var(--ink-border))",
-                  boxShadow: "var(--ink-shadow-sm)",
-                }}
-              >
-                <AppearanceControls
-                  ultraCalm={ultraCalm}
-                  theme={theme}
-                  onToggleMode={() =>
-                    setMode((m) => (m === "light" ? "dark" : "light"))
-                  }
-                  onThemeChange={setTheme}
-                  mobile
-                />
-              </div>
+            {/* Content */}
+            <div className="pb-20 md:pb-0">
+              {children}
             </div>
-
-            <div className="pb-16 md:pb-0">{children}</div>
           </main>
         </div>
       </div>
 
+      {/* Mobile navigation */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+        className="
+          fixed
+          bottom-0
+          left-0
+          right-0
+          z-50
+          md:hidden
+        "
         style={{
-          borderTop: "1px solid rgb(var(--ink-border))",
           background: "rgb(var(--ink-surface))",
-          boxShadow: "0 -8px 24px rgba(0, 0, 0, 0.06)",
+          borderTop:
+            "1px solid rgb(var(--ink-border))",
+          boxShadow:
+            "0 -8px 24px rgb(0 0 0 / 0.06)",
         }}
         aria-label="Mobile navigation"
       >
         <div className="safe-bottom grid grid-cols-3 gap-2 px-3 py-2">
           {navItems.map((item) => {
-            const active = pathname === item.href;
+            const Icon = item.icon;
+            const active = isActive(item.href);
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                aria-current={active ? "page" : undefined}
-                className="flex min-h-[52px] flex-col items-center justify-center rounded-2xl px-2 py-2 text-center transition"
+                aria-current={
+                  active ? "page" : undefined
+                }
+                className="
+                  flex
+                  min-h-[56px]
+                  flex-col
+                  items-center
+                  justify-center
+                  gap-1
+                  rounded-xl
+                  px-2
+                  py-2
+                  text-center
+                "
                 style={{
-                  color: active
-                    ? "rgb(var(--ink-text))"
-                    : "rgb(var(--ink-text-soft))",
-                  fontWeight: active ? 600 : 500,
                   background: active
                     ? "rgb(var(--ink-surface-soft))"
                     : "transparent",
+                  color: active
+                    ? "rgb(var(--ink-text))"
+                    : "rgb(var(--ink-text-soft))",
                   border: active
                     ? "1px solid rgb(var(--ink-border))"
                     : "1px solid transparent",
-                  boxShadow: active ? "var(--ink-shadow-sm)" : "none",
+                  fontWeight: active ? 700 : 500,
                 }}
               >
-                <span
-                  className="mb-1 h-1.5 w-1.5 rounded-full"
-                  style={{
-                    background: active
-                      ? "rgb(var(--ink-accent))"
-                      : "transparent",
-                  }}
+                <Icon
+                  className="ink-icon"
                   aria-hidden="true"
                 />
-                <span className="text-[0.8rem] leading-none">{item.label}</span>
+
+                <span className="text-xs">
+                  {item.label}
+                </span>
               </Link>
             );
           })}
@@ -316,228 +390,28 @@ export default function AppShell({ title, children }: Props) {
   );
 }
 
-function AppearanceControls({
-  ultraCalm,
-  theme,
-  onToggleMode,
-  onThemeChange,
-  className = "",
-  mobile = false,
-}: {
-  ultraCalm: boolean;
-  theme: ThemeName;
-  onToggleMode: () => void;
-  onThemeChange: (theme: ThemeName) => void;
-  className?: string;
-  mobile?: boolean;
-}) {
-  const themeOptions: {
-    value: ThemeName;
-    label: string;
-    swatch: string;
-  }[] = [
-    { value: "sand", label: "Sand", swatch: "rgb(122 92 72)" },
-    { value: "sage", label: "Sage", swatch: "rgb(92 120 104)" },
-    { value: "dusk", label: "Dusk", swatch: "rgb(111 102 163)" },
-    { value: "rose", label: "Rose", swatch: "rgb(154 96 110)" },
-  ];
-
-  return (
-    <div className={className}>
-      {!mobile ? (
-        <div
-          className="rounded-2xl p-4 text-sm"
-          style={{
-            background: "rgb(var(--ink-surface-soft))",
-            color: "rgb(var(--ink-text-soft))",
-            border: "1px solid rgb(var(--ink-border))",
-            boxShadow: "var(--ink-shadow-sm)",
-          }}
-        >
-          <div
-            style={{
-              color: "rgb(var(--ink-text))",
-              fontWeight: 600,
-            }}
-          >
-            Low pressure
-          </div>
-          <div className="mt-1">No streaks. No shame. Just return.</div>
-        </div>
-      ) : null}
-
-      <div className="space-y-4">
-        <section
-          className="rounded-2xl p-4"
-          style={{
-            background: "rgb(var(--ink-surface))",
-            border: "1px solid rgb(var(--ink-border))",
-            boxShadow: "var(--ink-shadow-sm)",
-          }}
-        >
-          <div className="mb-3">
-            <div
-              className="text-xs font-medium uppercase tracking-[0.14em]"
-              style={{ color: "rgb(var(--ink-text-soft))" }}
-            >
-              Display mode
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onToggleMode}
-            aria-pressed={ultraCalm}
-            aria-label={`Ultra calm mode ${ultraCalm ? "on" : "off"}`}
-            className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition"
-            style={{
-              background: "rgb(var(--ink-surface-soft))",
-              border: "1px solid rgb(var(--ink-border))",
-              boxShadow: "var(--ink-shadow-sm)",
-            }}
-          >
-            <span className="flex items-center gap-3">
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-full"
-                style={{
-                  background: "rgba(var(--ink-accent), 0.12)",
-                  border: "1px solid rgba(var(--ink-accent), 0.18)",
-                  color: "rgb(var(--ink-text))",
-                }}
-                aria-hidden="true"
-              >
-                🌙
-              </span>
-
-              <span>
-                <span
-                  className="block text-sm font-medium"
-                  style={{ color: "rgb(var(--ink-text))" }}
-                >
-                  Ultra calm
-                </span>
-                <span
-                  className="block text-xs"
-                  style={{ color: "rgb(var(--ink-text-soft))" }}
-                >
-                  Softer, darker focus mode
-                </span>
-              </span>
-            </span>
-
-            <span
-              className="relative inline-flex h-7 w-12 items-center rounded-full transition"
-              style={{
-                background: ultraCalm
-                  ? "rgb(var(--ink-accent))"
-                  : "rgb(var(--ink-border))",
-              }}
-              aria-hidden="true"
-            >
-              <span
-                className="absolute h-5 w-5 rounded-full transition"
-                style={{
-                  left: ultraCalm ? "1.45rem" : "0.2rem",
-                  background: "rgb(var(--ink-surface))",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
-                }}
-              />
-            </span>
-          </button>
-        </section>
-
-        <section
-          className="rounded-2xl p-4"
-          style={{
-            background: "rgb(var(--ink-surface))",
-            border: "1px solid rgb(var(--ink-border))",
-            boxShadow: "var(--ink-shadow-sm)",
-          }}
-        >
-          <div className="mb-3">
-            <div
-              className="text-xs font-medium uppercase tracking-[0.14em]"
-              style={{ color: "rgb(var(--ink-text-soft))" }}
-            >
-              Color theme
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {themeOptions.map((option) => {
-              const selected = theme === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => onThemeChange(option.value)}
-                  aria-pressed={selected}
-                  className="rounded-2xl px-3 py-3 text-left transition"
-                  style={{
-                    background: selected
-                      ? "rgb(var(--ink-surface-soft))"
-                      : "rgb(var(--ink-surface))",
-                    border: selected
-                      ? "1px solid rgb(var(--ink-accent))"
-                      : "1px solid rgb(var(--ink-border))",
-                    boxShadow: selected ? "var(--ink-shadow-sm)" : "none",
-                  }}
-                >
-                  <span className="mb-2 flex items-center gap-2">
-                    <span
-                      className="h-3 w-3 rounded-full"
-                      style={{ background: option.swatch }}
-                      aria-hidden="true"
-                    />
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: "rgb(var(--ink-text))" }}
-                    >
-                      {option.label}
-                    </span>
-                  </span>
-
-                  <span
-                    className="block text-xs"
-                    style={{ color: "rgb(var(--ink-text-soft))" }}
-                  >
-                    {selected ? "Selected" : "Tap to apply"}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      </div>
-    </div>
-  );
-}
-
 function SideNavLink({
   href,
+  label,
+  icon: Icon,
   active,
-  children,
 }: {
   href: string;
+  label: string;
+  icon: LucideIcon;
   active: boolean;
-  children: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className="block rounded-xl px-3 py-2 text-sm transition"
-      style={{
-        background: active ? "rgb(var(--ink-surface-soft))" : "transparent",
-        color: active ? "rgb(var(--ink-text))" : "rgb(var(--ink-text-soft))",
-        border: active
-          ? "1px solid rgb(var(--ink-border))"
-          : "1px solid transparent",
-        fontWeight: active ? 600 : 400,
-      }}
+      className="ink-nav-link"
     >
-      {children}
+      <Icon
+        className="ink-icon"
+        aria-hidden="true"
+      />
+      <span>{label}</span>
     </Link>
   );
 }

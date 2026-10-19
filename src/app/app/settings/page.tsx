@@ -14,6 +14,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import AppShell from "@/components/AppShell";
 import { useAuth } from "@/components/AuthProvider";
 import { auth, db } from "@/lib/firebase";
+import AppearanceSettings from "@/components/AppearanceSettings";
 
 function getFriendlySettingsError(error: unknown) {
   const firebaseError = error as { code?: string; message?: string };
@@ -250,7 +251,7 @@ export default function SettingsPage() {
             className="rounded-2xl px-4 py-3 text-sm ink-subtext"
             style={{
               border: "1px solid rgb(var(--ink-border))",
-              background: "rgb(var(--ink-muted-surface))",
+              background: "rgb(var(--ink-surface-soft))",
             }}
             role="status"
           >
@@ -453,7 +454,8 @@ export default function SettingsPage() {
           </section>
 
           <section className="space-y-4">
-            <div className="ink-card p-5">
+            <AppearanceSettings />
+            {/* <div className="ink-card p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] ink-subtext">
                 Appearance
               </p>
@@ -475,7 +477,7 @@ export default function SettingsPage() {
                 <PreferenceRow label="Color theme" value="Available in sidebar" />
                 <PreferenceRow label="No streaks" value="Always on" />
               </div>
-            </div>
+            </div> */}
 
             <div className="ink-card p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] ink-subtext">
@@ -504,7 +506,7 @@ export default function SettingsPage() {
               className="rounded-2xl p-4"
               style={{
                 border: "1px solid rgb(var(--ink-border))",
-                background: "rgb(var(--ink-muted-surface))",
+                background: "rgb(var(--ink-surface-soft))",
               }}
             >
               <p
